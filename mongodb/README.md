@@ -1,5 +1,7 @@
 # <p align="center">MongoDB</p>
 
+To get more information refer to [https://www.mongodb.com](https://www.mongodb.com).
+
 # Setup
 
 ## Dockerized Installation
@@ -176,6 +178,7 @@ docker cp  ./insertPersons.js mongo:/insertPersons.js
 ```
 
 Mongosh can interpret JS files therefore run the following command to insert data.
+
 ```shell
 docker exec -it mongo mongosh "mongodb://${username}:${password}@localhost:27017/${dbName}?authSource=admin" insertPersons.js
 
@@ -253,6 +256,21 @@ db.persons.aggregate(
 
 ```shell
 db.persons.aggregate( [ { $group : { _id : "$Address.Country", count: { $count:{} } } } ] )
+```
+
+## GridFS
+
+It is for storing Binary files as BSON.
+
+```shell
+mongofiles --host localhost --port 27017 --username root --password root --authenticationDatabase admin --db tutorial put the-file
+mongofiles --host localhost --port 27017 --username root --password root --authenticationDatabase admin --db tutorial list
+mongofiles --host localhost --port 27017 --username root --password root --authenticationDatabase admin --db tutorial get the-file
+mongofiles --host localhost --port 27017 --username root --password root --authenticationDatabase admin --db tutorial delete the-file
+
+# Example
+docker exec -it mongo mongofiles --host localhost --port 27017 --username root --password root --authenticationDatabase admin --db tutorial put persons.json
+
 ```
 
 #
