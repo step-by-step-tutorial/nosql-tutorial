@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  janusgraph:
+    image: janusgraph/janusgraph
+    container_name: janusgraph
+    hostname: janusgraph
+    restart: always
+    environment:
+      JANUS_PROPS_TEMPLATE: cql-es
+      janusgraph.storage.hostname: cassandra
+      janusgraph.index.search.hostname: elasticsearch
+    ports:
+      - "8182:8182"
+  cassandra:
+    image: cassandra:3
+    container_name: cassandra
+    hostname: cassandra
+    restart: always
+    ports:
+      - "9042:9042"
+      - "9160:9160"
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.17.5
+    container_name: elasticsearch
+    hostname: elasticsearch
+    restart: always
+    environment:
+      ES_JAVA_OPTS: -Xms512m -Xmx512m
+      http.host: 0.0.0.0
+      network.host: 0.0.0.0
+      transport.host: 127.0.0.1
+      cluster.name: docker-cluster
+      xpack.security.enabled: false
+      discovery.zen.minimum_master_nodes: 1
+      discovery.type: single-node
+    ports:
+      - "9200:9200"
