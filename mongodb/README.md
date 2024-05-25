@@ -39,6 +39,8 @@ the `/path/to/` directory in your machine.
 
 In the following you can see the prepared config file and docker compose file.
 
+[mongod.conf](./config/mongod.conf)
+
 ```textmate
 #mongod.conf
 
@@ -81,6 +83,8 @@ security:
 #auditLog:
 ```
 
+[docker-compose.yml](docker-compose.yml)
+
 ```yaml
 # docker-compose.yml
 version: '3.8'
@@ -119,13 +123,26 @@ Execute the command mentioned in the below to create MongoDB container.
 docker compose --file docker-compose.yml --project-name mongo up -d --build
 ```
 
+More commands to remove whatever you created.
+
+```shell
+docker rm mongo --force
+docker image rm mongo
+
+docker rm mongodb-community-server --force
+docker image rm mongodb/mongodb-community-server
+
+docker rm mongo-express --force
+docker image rm mongo-express
+```
+
 ## Kubernetes Installation
 
 create the following Kubernetes files then apply them.
 
 ### mongoDB
 
-[mongo-configmap](./kube/mongo-configmap.yml)
+[mongo-configmap.yml](./kube/mongo-configmap.yml)
 
 ```yaml
 # mongo-configmap.yml 
@@ -175,7 +192,7 @@ data:
 
 ```
 
-[mongo-secrets](./kube/mongo-secrets.yml)
+[mongo-secrets.yml](./kube/mongo-secrets.yml)
 
 ```yaml
 # mongo-secrets.yml
@@ -192,7 +209,7 @@ data:
 
 ```
 
-[mongo-pvc](./kube/mongo-pvc.yml)
+[mongo-pvc.yml](./kube/mongo-pvc.yml)
 
 ```yaml
 # mongo-pvc.yml
@@ -209,7 +226,7 @@ spec:
 
 ```
 
-[mongo-deployment](./kube/mongo-deployment.yml)
+[mongo-deployment.yml](./kube/mongo-deployment.yml)
 
 ```yaml
 # mongo-deployment.yml
@@ -259,7 +276,7 @@ spec:
 
 ```
 
-[mongo-service](./kube/mongo-service.yml)
+[mongo-service.yml](./kube/mongo-service.yml)
 
 ```yaml
 # mongo-service.yml
@@ -278,7 +295,7 @@ spec:
 
 ### MongoExpress
 
-[mongo-express-deployment](./kube/mongo-express-deployment.yml)
+[mongo-express-deployment.yml](./kube/mongo-express-deployment.yml)
 
 ```yaml
 # mongo-express-deployment.yml
@@ -319,7 +336,7 @@ spec:
 
 ```
 
-[mongo-express-service](./kube/mongo-express-service.yml)
+[mongo-express-service.yml](./kube/mongo-express-service.yml)
 
 ```yaml
 # mongo-express-service.yml
@@ -334,6 +351,69 @@ spec:
     - port: 8081
       targetPort: 8081
 
+```
+
+You can apply Kubernetes files using the following commands.
+
+```shell
+# ======================================================================================================================
+# MongoDB
+# ======================================================================================================================
+kubectl apply -f ./kube/mongo-pvc.yml
+# kubectl get pvc
+# kubectl describe pvc mongo-pvc
+
+kubectl apply -f ./kube/mongo-secrets.yml
+# kubectl describe secret mongo-secrets -n default
+# kubectl get secret mongo-secrets -n default -o yaml
+
+kubectl apply -f ./kube/mongo-configmap.yml
+# kubectl describe configmap mongo-configmap -n default
+# kubectl get configmap mongo-configmap -n default -o yaml
+
+kubectl apply -f ./kube/mongo-deployment.yml
+# kubectl get deployments -n default
+# kubectl describe deployment mongo -n default
+
+kubectl apply -f ./kube/mongo-service.yml
+# kubectl get service -n default
+# kubectl describe service mongo -n default
+
+# ======================================================================================================================
+# Mongo Express
+# ======================================================================================================================
+kubectl apply -f ./kube/mongo-express-deployment.yml
+# kubectl get deployments -n default
+# kubectl describe deployment mongo-express -n default
+
+kubectl apply -f ./kube/mongo-express-service.yml
+# kubectl get services -n default
+# kubectl describe service mongo-express -n default
+
+# ======================================================================================================================
+# After Install
+# ======================================================================================================================
+kubectl get all
+
+# ======================================================================================================================
+# Access from localhost
+# ======================================================================================================================
+# if you want to connect database from localhost through the application use the following command
+kubectl port-forward service/mongo 27017:27017
+
+# if you want to connect to mongo-express from localhost through the web browser use the following command
+# http://localhost:8081
+kubectl port-forward service/mongo-express 8081:8081
+
+```
+
+More command to delete everything you created and deployed to Kubernetes.
+
+```shell
+kubectl delete all --all
+kubectl delete secrets mongo-secrets
+kubectl delete secrets mongo-configmap
+kubectl delete persistentvolumeclaim mongo-pvc
 ```
 
 ## Mongo Shell
