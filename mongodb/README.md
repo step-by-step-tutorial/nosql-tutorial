@@ -1,12 +1,88 @@
 # <p align="center">MongoDB</p>
 
-To get more information refer to [https://www.mongodb.com](https://www.mongodb.com).
+MongoDB is a document database in NoSQL topic. To get more information refer
+to [https://www.mongodb.com](https://www.mongodb.com).
+
+# Use Case
+
+List of use cases for
+MongoDB [https://www.mongodb.com/solutions/use-cases](https://www.mongodb.com/solutions/use-cases).
+
+* Artificial Intelligence
+* Edge Computing
+* Internet of Things
+* Mobile
+* Payments
+* Serverless Development
+* Single View
+* Personalization
+* Catalog
+* Content Management
+* Mainframe Modernization
+* Gaming
 
 # Setup
 
 ## Dockerized Installation
 
+If installed MongoDB is included `MONGO_INITDB_ROOT_USERNAME` and `MONGO_INITDB_ROOT_PASSWORD` then the connection URL
+will be in this format `mongodb://ROOT_USERNAME:ROOT_PASSWORD@MONGODB_HOST:PORT`,
+i.g., `mongodb://root:root@mongo:27017` otherwise remove username and password from every place in this tutorial. Maybe
+for some operations you need to add `?authSource=admin"` as parameter at then end of URL connection.
+
+### Config File
+
+If you set up MongoDB with username and password then you should enable `security.authorization` in `mongod.conf`
+located in `/etc` directory of MongoDB machine. In oder to apply this change,
+add `/path/to/mongod.conf:/etc/mongod.conf` volume to the docker compose file and put the customized config file in
+the `/path/to/` directory in your machine.
+
+In the following you can see the prepared config file and docker compose file.
+
+```textmate
+#mongod.conf
+
+# for documentation of all options, see:
+#   http://docs.mongodb.org/manual/reference/configuration-options/
+
+# Where and how to store data.
+storage:
+  dbPath: /var/lib/mongodb
+#  engine:
+#  wiredTiger:
+
+# where to write logging data.
+systemLog:
+  destination: file
+  logAppend: true
+  path: /var/log/mongodb/mongod.log
+
+# network interfaces
+net:
+  port: 27017
+  bindIp: 127.0.0.1
+
+
+# how the process runs
+processManagement:
+  timeZoneInfo: /usr/share/zoneinfo
+
+security:
+  authorization: enabled
+
+#operationProfiling:
+
+#replication:
+
+#sharding:
+
+## Enterprise-Only Options:
+
+#auditLog:
+```
+
 ```yaml
+# docker-compose.yml
 version: '3.8'
 
 services:
@@ -20,6 +96,8 @@ services:
     environment:
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: root
+    volumes:
+      - "./config/mongod.conf:/etc/mongod.conf"
   mongo-express:
     image: mongo-express
     container_name: mongo-express
@@ -35,9 +113,26 @@ services:
       ME_CONFIG_MONGODB_URL: mongodb://root:root@mongo:27017
 ```
 
+Execute the command mentioned in the below to create MongoDB container.
+
 ```shell
 docker compose --file docker-compose.yml --project-name mongo up -d --build
 ```
+
+## Kubernetes Installation
+
+create the following Kubernetes files then apply them.
+
+
+[mongo-configmap](./kube/mongo-configmap).yml         
+mongo-deployment.yml        
+mongo-express-deployment.yml
+mongo-express-service.yml   
+mongo-pvc.yml               
+mongo-secrets.yml           
+mongo-service.yml
+
+
 
 ## Mongo Shell
 

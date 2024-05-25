@@ -9,6 +9,10 @@ kubectl apply -f ./kube/mongo-secrets.yml
 # kubectl describe secret mongo-secrets -n default
 # kubectl get secret mongo-secrets -n default -o yaml
 
+kubectl apply -f ./kube/mongo-configmap.yml
+# kubectl describe configmap mongo-configmap -n default
+# kubectl get configmap mongo-configmap -n default -o yaml
+
 kubectl apply -f ./kube/mongo-deployment.yml
 # kubectl get deployments -n default
 # kubectl describe deployment mongo -n default

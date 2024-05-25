@@ -18,8 +18,11 @@ spec:
           ports:
             - containerPort: 27017
           volumeMounts:
-            - name: mongo-data
-              mountPath: /data/db
+            - mountPath: /data/db
+              name: mongo-data
+            - mountPath: /etc/mongod.conf
+              subPath: mongod.conf
+              name: mongo-config
           env:
             - name: MONGO_INITDB_ROOT_USERNAME
               valueFrom:
@@ -35,3 +38,6 @@ spec:
         - name: mongo-data
           persistentVolumeClaim:
             claimName: mongo-pvc
+        - name: mongo-config
+          configMap:
+            name: mongo-config
