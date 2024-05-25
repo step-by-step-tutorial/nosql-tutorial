@@ -680,6 +680,7 @@ mongofiles --host localhost --port 27017 --username root --password root --authe
 mongofiles --host localhost --port 27017 --username root --password root --authenticationDatabase admin --db tutorial delete the-file
 
 # Example
+docker cp ./persons.json mongo:/persons.json
 docker exec -it mongo mongofiles --host localhost --port 27017 --username root --password root --authenticationDatabase admin --db tutorial put persons.json
 
 ```
