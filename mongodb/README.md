@@ -123,16 +123,218 @@ docker compose --file docker-compose.yml --project-name mongo up -d --build
 
 create the following Kubernetes files then apply them.
 
+### mongoDB
 
-[mongo-configmap](./kube/mongo-configmap).yml         
-mongo-deployment.yml        
-mongo-express-deployment.yml
-mongo-express-service.yml   
-mongo-pvc.yml               
-mongo-secrets.yml           
-mongo-service.yml
+[mongo-configmap](./kube/mongo-configmap.yml)
+
+```yaml
+# mongo-configmap.yml 
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mongo-config
+data:
+  mongod.conf: |
+    # for documentation of all options, see:
+    #   http://docs.mongodb.org/manual/reference/configuration-options/
+
+    # Where and how to store data.
+    storage:
+      dbPath: /var/lib/mongodb
+    #  engine:
+    #  wiredTiger:
+
+    # where to write logging data.
+    systemLog:
+      destination: file
+      logAppend: true
+      path: /var/log/mongodb/mongod.log
+
+    # network interfaces
+    net:
+      port: 27017
+      bindIp: 127.0.0.1
 
 
+    # how the process runs
+    processManagement:
+      timeZoneInfo: /usr/share/zoneinfo
+
+    security:
+      authorization: enabled
+
+    #operationProfiling:
+
+    #replication:
+
+    #sharding:
+
+    ## Enterprise-Only Options:
+
+    #auditLog:
+
+```
+
+[mongo-secrets](./kube/mongo-secrets.yml)
+
+```yaml
+# mongo-secrets.yml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: mongo-secrets
+type: Opaque
+data:
+  # value: root
+  username: cm9vdA==
+  # value: root
+  password: cm9vdA==
+
+```
+
+[mongo-pvc](./kube/mongo-pvc.yml)
+
+```yaml
+# mongo-pvc.yml
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mongo-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+
+```
+
+[mongo-deployment](./kube/mongo-deployment.yml)
+
+```yaml
+# mongo-deployment.yml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mongo
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mongo
+  template:
+    metadata:
+      labels:
+        app: mongo
+    spec:
+      containers:
+        - name: mongo
+          image: mongo:latest
+          ports:
+            - containerPort: 27017
+          volumeMounts:
+            - mountPath: /data/db
+              name: mongo-data
+            - mountPath: /etc/mongod.conf
+              subPath: mongod.conf
+              name: mongo-config
+          env:
+            - name: MONGO_INITDB_ROOT_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: mongo-secrets
+                  key: username
+            - name: MONGO_INITDB_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mongo-secrets
+                  key: password
+      volumes:
+        - name: mongo-data
+          persistentVolumeClaim:
+            claimName: mongo-pvc
+        - name: mongo-config
+          configMap:
+            name: mongo-config
+
+```
+
+[mongo-service](./kube/mongo-service.yml)
+
+```yaml
+# mongo-service.yml
+apiVersion: v1
+kind: Service
+metadata:
+  name: mongo
+spec:
+  selector:
+    app: mongo
+  ports:
+    - port: 27017
+      targetPort: 27017
+
+```
+
+### MongoExpress
+
+[mongo-express-deployment](./kube/mongo-express-deployment.yml)
+
+```yaml
+# mongo-express-deployment.yml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mongo-express
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mongo-express
+  template:
+    metadata:
+      labels:
+        app: mongo-express
+    spec:
+      containers:
+        - name: mongo-express
+          image: mongo-express:latest
+          ports:
+            - containerPort: 8081
+          env:
+            - name: ME_CONFIG_BASICAUTH
+              value: "false"
+            - name: ME_CONFIG_MONGODB_ADMINUSERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: mongo-secrets
+                  key: username
+            - name: ME_CONFIG_MONGODB_ADMINPASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mongo-secrets
+                  key: password
+            - name: ME_CONFIG_MONGODB_URL
+              value: "mongodb://$(ME_CONFIG_MONGODB_ADMINUSERNAME):$(ME_CONFIG_MONGODB_ADMINPASSWORD)@mongo:27017"
+
+```
+
+[mongo-express-service](./kube/mongo-express-service.yml)
+
+```yaml
+# mongo-express-service.yml
+apiVersion: v1
+kind: Service
+metadata:
+  name: mongo-express
+spec:
+  selector:
+    app: mongo-express
+  ports:
+    - port: 8081
+      targetPort: 8081
+
+```
 
 ## Mongo Shell
 
@@ -222,6 +424,9 @@ db.persons.insertOne({
 ### Insert Many
 
 ```shell
+db.collection_name.insertMany([array]);
+
+# Example
 db.persons.insertMany(
 [
   {"ID": 1, "Salutation": "Mr.", "FirstName": "John", "LastName": "Doe", "DateOfBirth": "1985-04-23", "Gender": "Male", "MaritalStatus": "Single", "BirthNationality": "American", "CurrentNationality": "American", "Country": "USA", "Province": "California", "City": "Los Angeles", "ZipCode": "90001", "Street": "Sunset Blvd", "HouseNumber": "123", "MobilePhone": "+1-310-555-1234", "EmailAddress": "john.doe@example.com", "JobTitle": "Software Engineer", "FieldOfStudy": "Computer Science", "AcademicDegree": "Bachelor"},
@@ -241,7 +446,14 @@ db.persons.insertMany(
 
 ### Insert Bulk (From JSON File)
 
-Create a file insertPersons.js then copy and past the following codes.
+In this scenario I provided a [JSON file](./persons.json) include 10000 records for Person model therefore bulk function
+must read the
+file at first then map them to the bulk operation.
+
+In order to insert many data as batch/bulk you have to implement a function to execute the bulk operation therefore you
+can implement the function in JS because `mongosh` support JS so create a JS file name `insertPersonsAsBulk.js` or any
+other
+name then copy and past the following codes to the file.
 
 ```js
 const fs = require('fs');
@@ -262,23 +474,23 @@ const result = db.persons.bulkWrite(bulkOps);
 printjson(result);
 ```
 
-Copy persons.json and insertPersons.js to docker container.
+Now copy `persons.json` and `insertPersonsAsBulk.js` to MongoDB container with the commands were written at below.
 
 ```shell
-docker cp  path/to/host-file container-name:path/to/contaner-file
+docker cp  /path/to/host-file container-name:/path/to/contaner-file
 
 #Example
 docker cp ./persons.json mongo:/persons.json
-docker cp  ./insertPersons.js mongo:/insertPersons.js 
+docker cp  ./insertPersonsAsBulk.js mongo:/insertPersonsAsBulk.js 
 ```
 
 Mongosh can interpret JS files therefore run the following command to insert data.
 
 ```shell
-docker exec -it mongo mongosh "mongodb://${username}:${password}@localhost:27017/${dbName}?authSource=admin" insertPersons.js
+docker exec -it mongo mongosh "mongodb://${username}:${password}@localhost:27017/${dbName}?authSource=admin" insertPersonsAsBulk.js
 
 #Example
-docker exec -it mongo mongosh "mongodb://root:root@mongo:27017/tutorial?authSource=admin" insertPersons.js
+docker exec -it mongo mongosh "mongodb://root:root@mongo:27017/tutorial?authSource=admin" insertPersonsAsBulk.js
 ```
 
 ### Find
@@ -292,7 +504,25 @@ db.persons.find({},{_id:0, FirstName:1,LastName:1});
 
 ### Set
 
+In this example I want to composite all fields related to address in the one object name `Address` included in parent
+collection (inner object).
+
 ```shell
+db.collection_name.updateMany(
+    {},
+    [
+        {
+            $set: {
+               field: "new value"
+            }
+        },
+        { # optional: if you need to remove any specific field
+            $unset: ["fields", ...]
+        }
+    ]
+);
+
+# Example
 db.persons.updateMany(
     {},
     [
@@ -325,7 +555,11 @@ db.collection_name.deleteOne({ _id: ObjectId("object_id") });
 
 ```
 
-### Aggregation (Virtual Field)
+### Aggregation
+
+Aggregate means to produce a value by combining multiple resources.
+
+#### Example: Virtual Field
 
 ```shell
 db.persons.aggregate(
@@ -347,7 +581,7 @@ db.persons.aggregate(
 );
 ```
 
-### Aggregation (Group By)
+### Example: Group By
 
 ```shell
 db.persons.aggregate( [ { $group : { _id : "$Address.Country", count: { $count:{} } } } ] )
@@ -355,7 +589,9 @@ db.persons.aggregate( [ { $group : { _id : "$Address.Country", count: { $count:{
 
 ## GridFS
 
-It is for storing Binary files as BSON.
+It is for storing Binary files as BSON. Refer
+to [https://www.mongodb.com/docs/manual/core/gridfs](https://www.mongodb.com/docs/manual/core/gridfs) for more
+information.
 
 ```shell
 mongofiles --host localhost --port 27017 --username root --password root --authenticationDatabase admin --db tutorial put the-file
