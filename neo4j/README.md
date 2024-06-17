@@ -4,6 +4,22 @@ It is a high performance graph store with all the features expected of a mature 
 query language and ACID transactions. For more information refer
 to [https://github.com/neo4j/neo4j](https://github.com/neo4j/neo4j)
 
+# Use Case
+
+List of use cases for Neo4j
+[https://go.neo4j.com/rs/710-RRC-335/images/Neo4j-Top-10-Use-Cases-EN-US.pdf](https://go.neo4j.com/rs/710-RRC-335/images/Neo4j-Top-10-Use-Cases-EN-US.pdf).
+
+* Fraud Detection
+* Real-Time Recommendation Engine
+* Knowledge Graphs
+* Anti-Money Laundering
+* Master Data Management
+* Supply Chain Management
+* Empowering Network & IT Operations Management 14
+* Data Lineage
+* Identity & Access Management
+* Bill of Materials
+
 # Setup
 
 ## Dockerized Installation
@@ -22,42 +38,205 @@ services:
     container_name: neo4j
     hostname: neo4j
     ports:
-      - "7474:7474"
-      - "7687:7687"
+      - "7474:7474" # http
+      - "7687:7687" # bolt
     volumes:
       - "./data:/data"
     environment:
-      NEO4J_AUTH: none
-
+      NEO4J_AUTH: root/root
 ```
 
 Execute this command to create containerized neo4j.
 
 ```shell
 docker compose --file docker-compose.yml --project-name neo4j up -d --build
+```
+
+Try to log in to the Neo4j via browser [http://localhost:7474](http://localhost:7474).
+
+Insert following value to connect to server in login page.
+
+<img src="neo4j-login.png" width="50%" height="50%">
+
+URL: bolt://localhost:7678
+Authentication type: Username / Password
+Username: neo4j
+Password: password
+
+More commands to remove whatever you created.
+
+```shell
+docker rm neo4j --force
+docker image rm neo4j
+```
+
+## Kubernetes Installation
+
+[neo4j-secrets.yml](./kube/neo4j-secrets.yml)
+
+Use `echo -n secrets | base64` to encode the secrets, i.e, `echo -n neo4j/password | base64`.
+
+```yaml
+# neo4j-secrets.yml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: neo4j-secrets
+type: Opaque
+data:
+  # value: neo4j/password
+  neo4j_auth: bmVvNGovcGFzc3dvcmQ=
+```
+
+[neo4j-pvc.yml](./kube/neo4j-pvc.yml)
+
+```yaml
+# neo4j-pvc.yml
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: neo4j-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+```
+
+[neo4j-deployment.yml](./kube/neo4j-deployment.yml)
+
+```yaml
+# neo4j-deployment.yml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: neo4j
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: neo4j
+  template:
+    metadata:
+      labels:
+        app: neo4j
+    spec:
+      containers:
+        - name: neo4j
+          image: neo4j
+          ports:
+            - containerPort: 7474
+              name: http
+            - containerPort: 7687
+              name: bolt
+          volumeMounts:
+            - mountPath: /data
+              name: neo4j-data
+          env:
+            - name: NEO4J_AUTH
+              valueFrom:
+                secretKeyRef:
+                  name: neo4j-secrets
+                  key: neo4j_auth
+      volumes:
+        - name: neo4j-data
+          persistentVolumeClaim:
+            claimName: neo4j-pvc
+```
+
+[neo4j-service.yml](./kube/neo4j-service.yml)
+
+```yaml
+# neo4j-service.yml
+apiVersion: v1
+kind: Service
+metadata:
+  name: neo4j
+spec:
+  selector:
+    app: neo4j
+  ports:
+    - port: 7474
+      targetPort: 7474
+      name: http
+    - port: 7687
+      targetPort: 7687
+      name: bolt
 
 ```
 
-Try to log in to the Neo4j via browser [http://localhost:7474/browser](http://localhost:7474/browser).
+You can apply Kubernetes files using the following commands.
+
+```shell
+# ======================================================================================================================
+# Neo4j
+# ======================================================================================================================
+kubectl apply -f ./kube/neo4j-pvc.yml
+# kubectl get pvc
+# kubectl describe pvc neo4j-pvc
+
+kubectl apply -f ./kube/neo4j-secrets.yml
+# kubectl describe secret neo4j-secrets -n default
+# kubectl get secret neo4j-secrets -n default -o yaml
+
+kubectl apply -f ./kube/neo4j-deployment.yml
+# kubectl get deployments -n default
+# kubectl describe deployment neo4j -n default
+
+kubectl apply -f ./kube/neo4j-service.yml
+# kubectl get service -n default
+# kubectl describe service neo4j -n default
+
+# ======================================================================================================================
+# After Install
+# ======================================================================================================================
+kubectl get all
+
+# ======================================================================================================================
+# Access from localhost
+# ======================================================================================================================
+# if you want to connect database from localhost through the application use the following command
+kubectl port-forward service/neo4j 7687:7687
+
+# if you want to connect to neo4j from localhost through the web browser use the following command
+# http://localhost:7474
+kubectl port-forward service/neo4j 7474:7474
+
+```
+
+More command to delete everything you created and deployed to Kubernetes.
+
+```shell
+kubectl delete all --all
+
+kubectl delete secrets neo4j-secrets
+kubectl delete persistentvolumeclaim neo4j-pvc
+```
 
 # Queries
+
+Neo4j use Cypher query language. To get more information refer
+to [https://neo4j.com/docs/cypher-manual/current/introduction/](https://neo4j.com/docs/cypher-manual/current/introduction/)
+and [https://neo4j.com/docs/cypher-cheat-sheet/5/neo4j-community](https://neo4j.com/docs/cypher-cheat-sheet/5/neo4j-community)
 
 ## Create Node
 
 ### Create one node
 
 ```sql
-CREATE(ee:Person {name: 'Emil', from: 'Sweden', kloutScore: 99})
-  ```     
+CREATE
+(john:Person {name: 'John', from: 'USA', kloutScore: 99})
+```     
 
 ### Create Multi Node
 
 ```sql
 CREATE
-(js:Person { name: 'Johan', from: 'Sweden', learn: 'surfing' }),
-(ir:Person { name: 'Ian', from: 'England', title: 'author' }),
-(rvb:Person { name: 'Rik', from: 'Belgium', pet: 'Orval' }),
-(ally:Person { name: 'Allison', from: 'California', hobby: 'surfing' }) 
+(james:Person { name: 'James', from: 'USA', learn: 'surfing' }),
+(william:Person { name: 'William', from: 'England', title: 'author' }),
+(charlie:Person { name: 'Charlie', from: 'Australia', pet: 'Orval' }),
+(saman:Person { name: 'Saman', from: 'Iran', hobby: 'surfing' }) 
 ```
 
 ## Find
@@ -65,38 +244,38 @@ CREATE
 ### Find One Node
 
 ```sql
-MATCH (ee:Person) WHERE ee.name = 'Emil' RETURN ee;
+MATCH (john:Person) WHERE john.name = 'John' RETURN john;
 ```
 
 ### Find Multi Nodes
 
 ```sql
 MATCH 
-  (ee:Person {name: 'Emil'}),
-  (js:Person {name: 'Johan'}),
-  (ir:Person {name: 'Ian'}),
-  (rvb:Person {name: 'Rik'}),
-  (ally:Person {name: 'Allison'})
-RETURN ee, js, ir, rvb, ally
+  (john:Person {name: 'John'}),
+  (james:Person {name: 'James'}),
+  (william:Person {name: 'William'}),
+  (charlie:Person {name: 'Charlie'}),
+  (saman:Person {name: 'Saman'})
+RETURN john, james, william, charlie, saman
 ```
 
 ## Create Edge
 
 ```sql
 MATCH 
-  (ee:Person {name: 'Emil'}),
-  (js:Person {name: 'Johan'}),
-  (ir:Person {name: 'Ian'}),
-  (rvb:Person {name: 'Rik'}),
-  (ally:Person {name: 'Allison'})
-MERGE (ee)-[:KNOWS {since: 2001}]->(js)
-MERGE (ee)-[:KNOWS {rating: 5}]->(ir)
-MERGE (js)-[:KNOWS]->(ir)
-MERGE (js)-[:KNOWS]->(rvb)
-MERGE (ir)-[:KNOWS]->(js)
-MERGE (ir)-[:KNOWS]->(ally)
-MERGE (rvb)-[:KNOWS]->(ally)
-RETURN ee, js, ir, rvb, ally
+  (john:Person {name: 'John'}),
+  (james:Person {name: 'James'}),
+  (william:Person {name: 'William'}),
+  (charlie:Person {name: 'Charlie'}),
+  (saman:Person {name: 'Saman'})
+MERGE (john)-[:KNOWS {since: 2001}]->(james)
+MERGE (john)-[:KNOWS {rating: 5}]->(william)
+MERGE (james)-[:KNOWS]->(william)
+MERGE (james)-[:KNOWS]->(charlie)
+MERGE (william)-[:KNOWS]->(james)
+MERGE (william)-[:KNOWS]->(saman)
+MERGE (charlie)-[:KNOWS]->(saman)
+RETURN john, james, william, charlie, saman
 
 
 ```
@@ -105,14 +284,16 @@ RETURN ee, js, ir, rvb, ally
 
 ```sql
 MATCH 
-  (ee:Person {name: 'Emil'}),
-  (js:Person {name: 'Johan'}),
-  (ir:Person {name: 'Ian'}),
-  (rvb:Person {name: 'Rik'}),
-  (ally:Person {name: 'Allison'})
+  (john:Person {name: 'John'}),
+  (james:Person {name: 'James'}),
+  (william:Person {name: 'William'}),
+  (charlie:Person {name: 'Charlie'}),
+  (saman:Person {name: 'Saman'})
 DETACH DELETE
-ee, js, ir, rvb, ally
+john, james, william, charlie, saman
 
 ```
+
+#
 
 **<p align="center"> [Top](#neo4j) </p>**

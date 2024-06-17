@@ -5,8 +5,8 @@ to [https://www.mongodb.com](https://www.mongodb.com).
 
 # Use Case
 
-List of use cases for
-MongoDB [https://www.mongodb.com/solutions/use-cases](https://www.mongodb.com/solutions/use-cases).
+List of use cases for MongoDB
+[https://www.mongodb.com/solutions/use-cases](https://www.mongodb.com/solutions/use-cases).
 
 * Artificial Intelligence
 * Edge Computing
@@ -190,6 +190,8 @@ data:
 ```
 
 [mongo-secrets.yml](./kube/mongo-secrets.yml)
+
+Use `echo -n secrets | base64` to encode the secrets, i.e, `echo -n root | base64`.
 
 ```yaml
 # mongo-secrets.yml
