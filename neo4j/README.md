@@ -22,12 +22,18 @@ List of use cases for Neo4j
 
 # Setup
 
-## Dockerized Installation
+## Prerequisites
 
-Create a `docker compose` file include following content.
+* [Docker](https://www.docker.com/)
+* [Kubernetes](https://kubernetes.io/)
+
+## Installation Neo4j on Docker
+
+### Docker Compose File
+
+Create a docker compose file include following content.
 
 [docker-compose.yml](docker-compose.yml)
-
 ```yaml
 # docker-compose.yml
 version: '3.8'
@@ -38,13 +44,15 @@ services:
     container_name: neo4j
     hostname: neo4j
     ports:
-      - "7474:7474" # http
-      - "7687:7687" # bolt
+      - "7474:7474"
+      - "7687:7687"
     volumes:
-      - "./data:/data"
+      - "./conf:/var/lib/neo4j/conf"
     environment:
-      NEO4J_AUTH: root/root
+      NEO4J_AUTH: neo4j/password
 ```
+
+### Apply Docker Compose File
 
 Execute this command to create containerized neo4j.
 
@@ -52,16 +60,20 @@ Execute this command to create containerized neo4j.
 docker compose --file docker-compose.yml --project-name neo4j up -d --build
 ```
 
+### Login
+
 Try to log in to the Neo4j via browser [http://localhost:7474](http://localhost:7474).
 
 Insert following value to connect to server in login page.
 
-<img src="neo4j-login.png" width="50%" height="50%">
+<img src="neo4j-login.png" width="30%" height="30%">
 
-URL: bolt://localhost:7678
-Authentication type: Username / Password
-Username: neo4j
-Password: password
+* URL: bolt://localhost:7678
+* Authentication type: Username / Password
+* Username: neo4j
+* Password: password
+
+### Remove From Docker
 
 More commands to remove whatever you created.
 
@@ -70,11 +82,13 @@ docker rm neo4j --force
 docker image rm neo4j
 ```
 
-## Kubernetes Installation
+## Install Neo4j on Kubernetes
 
-[neo4j-secrets.yml](./kube/neo4j-secrets.yml)
+### Kube Files
 
 Use `echo -n secrets | base64` to encode the secrets, i.e, `echo -n neo4j/password | base64`.
+
+[neo4j-secrets.yml](./kube/neo4j-secrets.yml)
 
 ```yaml
 # neo4j-secrets.yml
@@ -166,44 +180,29 @@ spec:
 
 ```
 
+### Apply Kube Files
+
 You can apply Kubernetes files using the following commands.
 
 ```shell
-# ======================================================================================================================
-# Neo4j
-# ======================================================================================================================
 kubectl apply -f ./kube/neo4j-pvc.yml
-# kubectl get pvc
-# kubectl describe pvc neo4j-pvc
-
 kubectl apply -f ./kube/neo4j-secrets.yml
-# kubectl describe secret neo4j-secrets -n default
-# kubectl get secret neo4j-secrets -n default -o yaml
-
 kubectl apply -f ./kube/neo4j-deployment.yml
-# kubectl get deployments -n default
-# kubectl describe deployment neo4j -n default
-
 kubectl apply -f ./kube/neo4j-service.yml
-# kubectl get service -n default
-# kubectl describe service neo4j -n default
-
-# ======================================================================================================================
-# After Install
-# ======================================================================================================================
-kubectl get all
-
-# ======================================================================================================================
-# Access from localhost
-# ======================================================================================================================
-# if you want to connect database from localhost through the application use the following command
-kubectl port-forward service/neo4j 7687:7687
-
-# if you want to connect to neo4j from localhost through the web browser use the following command
-# http://localhost:7474
-kubectl port-forward service/neo4j 7474:7474
-
 ```
+
+To check status, use `kubectl get all` command.
+
+<p align="justify">
+
+In order to connect to Neo4j from localhost through the web browser use the following command.
+
+```shell
+kubectl port-forward service/neo4j 7687:7687
+kubectl port-forward service/neo4j 7474:7474
+```
+
+### Remove From Kubernetes
 
 More command to delete everything you created and deployed to Kubernetes.
 
@@ -292,6 +291,40 @@ MATCH
 DETACH DELETE
 john, james, william, charlie, saman
 
+```
+
+# Make File
+
+[Makefile](Makefile)
+```makefile
+docker-deploy:
+	docker compose --file docker-compose.yml --project-name neo4j up -d
+
+docker-rebuild-deploy:
+	docker compose --file docker-compose.yml --project-name neo4j up --build -d
+
+docker-remove-container:
+	docker rm neo4j --force
+
+docker-remove-image:
+	docker image rm neo4j
+
+kube-deploy:
+	kubectl apply -f ./kube/neo4j-pvc.yml
+	kubectl apply -f ./kube/neo4j-secret.yml
+	kubectl apply -f ./kube/neo4j-deployment.yml
+	kubectl apply -f ./kube/neo4j-service.yml
+
+kube-remove:
+	kubectl delete all --all
+	kubectl delete secrets neo4j-secrets
+	kubectl delete persistentvolumeclaim neo4j-pvc
+
+kube-port-forward-db:
+	kubectl port-forward service/neo4j 7474:7474
+
+kube-port-forward-web:
+	kubectl port-forward service/neo4j 7687:7687
 ```
 
 #

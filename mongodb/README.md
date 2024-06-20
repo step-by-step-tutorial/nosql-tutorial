@@ -23,7 +23,12 @@ List of use cases for MongoDB
 
 # Setup
 
-## Dockerized Installation
+## Prerequisites
+
+* [Docker](https://www.docker.com/)
+* [Kubernetes](https://kubernetes.io/)
+
+## Installation MongoDB on Docker
 
 If installed MongoDB is included `MONGO_INITDB_ROOT_USERNAME` and `MONGO_INITDB_ROOT_PASSWORD` then the connection URL
 will be in this format `mongodb://ROOT_USERNAME:ROOT_PASSWORD@MONGODB_HOST:PORT`,
@@ -83,6 +88,8 @@ security:
 #auditLog:
 ```
 
+### Docker Compose File
+
 [docker-compose.yml](docker-compose.yml)
 
 ```yaml
@@ -117,11 +124,15 @@ services:
       ME_CONFIG_MONGODB_URL: mongodb://root:root@mongo:27017
 ```
 
+### Apply Docker Compose File
+
 Execute the command mentioned in the below to create MongoDB container.
 
 ```shell
 docker compose --file docker-compose.yml --project-name mongo up -d --build
 ```
+
+### Remove From Docker
 
 More commands to remove whatever you created.
 
@@ -133,11 +144,30 @@ docker rm mongo-express --force
 docker image rm mongo-express
 ```
 
-## Kubernetes Installation
+## Install MongoDB on Kubernetes
 
 create the following Kubernetes files then apply them.
 
-### mongoDB
+### MongoDB Kube Files
+
+Use `echo -n secrets | base64` to encode the secrets, i.e, `echo -n root | base64`.
+
+[mongo-secrets.yml](./kube/mongo-secrets.yml)
+
+```yaml
+# mongo-secrets.yml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: mongo-secrets
+type: Opaque
+data:
+  # value: root
+  username: cm9vdA==
+  # value: root
+  password: cm9vdA==
+
+```
 
 [mongo-configmap.yml](./kube/mongo-configmap.yml)
 
@@ -186,25 +216,6 @@ data:
     ## Enterprise-Only Options:
 
     #auditLog:
-
-```
-
-[mongo-secrets.yml](./kube/mongo-secrets.yml)
-
-Use `echo -n secrets | base64` to encode the secrets, i.e, `echo -n root | base64`.
-
-```yaml
-# mongo-secrets.yml
-apiVersion: v1
-kind: Secret
-metadata:
-  name: mongo-secrets
-type: Opaque
-data:
-  # value: root
-  username: cm9vdA==
-  # value: root
-  password: cm9vdA==
 
 ```
 
@@ -292,7 +303,7 @@ spec:
 
 ```
 
-### MongoExpress
+### MongoExpress Kube Files
 
 [mongo-express-deployment.yml](./kube/mongo-express-deployment.yml)
 
@@ -352,59 +363,32 @@ spec:
 
 ```
 
+### Apply Kube Files
+
 You can apply Kubernetes files using the following commands.
 
 ```shell
-# ======================================================================================================================
-# MongoDB
-# ======================================================================================================================
-kubectl apply -f ./kube/mongo-pvc.yml
-# kubectl get pvc
-# kubectl describe pvc mongo-pvc
-
 kubectl apply -f ./kube/mongo-secrets.yml
-# kubectl describe secret mongo-secrets -n default
-# kubectl get secret mongo-secrets -n default -o yaml
-
 kubectl apply -f ./kube/mongo-configmap.yml
-# kubectl describe configmap mongo-configmap -n default
-# kubectl get configmap mongo-configmap -n default -o yaml
-
+kubectl apply -f ./kube/mongo-pvc.yml
 kubectl apply -f ./kube/mongo-deployment.yml
-# kubectl get deployments -n default
-# kubectl describe deployment mongo -n default
-
 kubectl apply -f ./kube/mongo-service.yml
-# kubectl get service -n default
-# kubectl describe service mongo -n default
-
-# ======================================================================================================================
-# Mongo Express
-# ======================================================================================================================
 kubectl apply -f ./kube/mongo-express-deployment.yml
-# kubectl get deployments -n default
-# kubectl describe deployment mongo-express -n default
-
 kubectl apply -f ./kube/mongo-express-service.yml
-# kubectl get services -n default
-# kubectl describe service mongo-express -n default
-
-# ======================================================================================================================
-# After Install
-# ======================================================================================================================
-kubectl get all
-
-# ======================================================================================================================
-# Access from localhost
-# ======================================================================================================================
-# if you want to connect database from localhost through the application use the following command
-kubectl port-forward service/mongo 27017:27017
-
-# if you want to connect to mongo-express from localhost through the web browser use the following command
-# http://localhost:8081
-kubectl port-forward service/mongo-express 8081:8081
-
 ```
+
+To check status, use `kubectl get all` command.
+
+<p align="justify">
+
+In order to connect to MongoDB and MongoExpress from localhost use the following command.
+
+```shell
+kubectl port-forward service/mongo 27017:27017
+kubectl port-forward service/mongo-express 8081:8081
+```
+
+### Remove From Kubernetes
 
 More command to delete everything you created and deployed to Kubernetes.
 
@@ -682,6 +666,47 @@ mongofiles --host localhost --port 27017 --username root --password root --authe
 docker cp ./persons.json mongo:/persons.json
 docker exec -it mongo mongofiles --host localhost --port 27017 --username root --password root --authenticationDatabase admin --db tutorial put persons.json
 
+```
+
+# Make File
+
+[Makefile](Makefile)
+
+```makefile
+docker-deploy:
+	docker compose --file docker-compose.yml --project-name mongo up -d
+
+docker-rebuild-deploy:
+	docker compose --file docker-compose.yml --project-name mongo up --build -d
+
+docker-remove-container:
+	docker rm mongo --force
+	docker rm mongo-express --force
+
+docker-remove-image:
+	docker image rm mongo
+	docker image rm mongo-express
+
+kube-deploy:
+	kubectl apply -f ./kube/mongo-secrets.yml
+	kubectl apply -f ./kube/mongo-configmap.yml
+	kubectl apply -f ./kube/mongo-pvc.yml
+	kubectl apply -f ./kube/mongo-deployment.yml
+	kubectl apply -f ./kube/mongo-service.yml
+	kubectl apply -f ./kube/mongo-express-deployment.yml
+	kubectl apply -f ./kube/mongo-express-service.yml
+
+kube-remove:
+	kubectl delete all --all
+	kubectl delete secrets mongo-secrets
+	kubectl delete secrets mongo-configmap
+	kubectl delete persistentvolumeclaim mongo-pvc
+
+kube-port-forward-db:
+	kubectl port-forward service/mongo 27017:27017
+
+kube-port-forward-web:
+	kubectl port-forward service/mongo-express 8081:8081
 ```
 
 #

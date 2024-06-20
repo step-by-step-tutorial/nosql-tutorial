@@ -1,23 +1,28 @@
-deployToDocker:
+docker-deploy:
 	docker compose --file docker-compose.yml --project-name neo4j up -d
 
-deployToDockerWithRebuild:
+docker-rebuild-deploy:
 	docker compose --file docker-compose.yml --project-name neo4j up --build -d
 
-shutdownContainers:
+docker-remove-container:
 	docker rm neo4j --force
 
-deleteImages:
+docker-remove-image:
 	docker image rm neo4j
 
-deployToKube:
+kube-deploy:
 	kubectl apply -f ./kube/neo4j-pvc.yml
+	kubectl apply -f ./kube/neo4j-secret.yml
 	kubectl apply -f ./kube/neo4j-deployment.yml
 	kubectl apply -f ./kube/neo4j-service.yml
 
-shutdownKube:
+kube-remove:
 	kubectl delete all --all
+	kubectl delete secrets neo4j-secrets
 	kubectl delete persistentvolumeclaim neo4j-pvc
 
-bindNeo4jToLocalhost:
+kube-port-forward-db:
 	kubectl port-forward service/neo4j 7474:7474
+
+kube-port-forward-web:
+	kubectl port-forward service/neo4j 7687:7687

@@ -1,34 +1,34 @@
-deployToDocker:
+docker-deploy:
 	docker compose --file docker-compose.yml --project-name mongo up -d
 
-deployToDockerWithRebuild:
+docker-rebuild-deploy:
 	docker compose --file docker-compose.yml --project-name mongo up --build -d
 
-shutdownContainers:
+docker-remove-container:
 	docker rm mongo --force
 	docker rm mongo-express --force
 
-deleteImages:
+docker-remove-image:
 	docker image rm mongo
 	docker image rm mongo-express
 
-deployToKube:
-	kubectl apply -f ./kube/mongo-pvc.yml
+kube-deploy:
 	kubectl apply -f ./kube/mongo-secrets.yml
 	kubectl apply -f ./kube/mongo-configmap.yml
+	kubectl apply -f ./kube/mongo-pvc.yml
 	kubectl apply -f ./kube/mongo-deployment.yml
 	kubectl apply -f ./kube/mongo-service.yml
 	kubectl apply -f ./kube/mongo-express-deployment.yml
 	kubectl apply -f ./kube/mongo-express-service.yml
 
-shutdownKube:
+kube-remove:
 	kubectl delete all --all
 	kubectl delete secrets mongo-secrets
 	kubectl delete secrets mongo-configmap
 	kubectl delete persistentvolumeclaim mongo-pvc
 
-bindMongoToLocalhost:
+kube-port-forward-db:
 	kubectl port-forward service/mongo 27017:27017
 
-bindMongoExpressToLocalhost:
+kube-port-forward-web:
 	kubectl port-forward service/mongo-express 8081:8081
