@@ -41,8 +41,8 @@ REM ============================================================================
 REM Access from localhost
 REM ====================================================================================================================
 REM if you want to connect database from localhost through the application use the following command
-kubectl port-forward service/mongo 27017:27017
+start cmd /k kubectl port-forward service/mongo 27017:27017
 
 REM if you want to connect to mongo-express from localhost through the web browser use the following command
 REM http://localhost:8081
-kubectl port-forward service/mongo-express 8081:8081
+start cmd /k kubectl port-forward service/mongo-express 8081:8081

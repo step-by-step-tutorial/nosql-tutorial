@@ -26,8 +26,8 @@ REM ============================================================================
 REM Access from localhost
 REM ====================================================================================================================
 REM if you want to connect database from localhost through the application use the following command
-kubectl port-forward service/neo4j 7687:7687
+start cmd /k kubectl port-forward service/neo4j 7687:7687
 
 REM if you want to connect to neo4j from localhost through the web browser use the following command
 REM http://localhost:7474
-kubectl port-forward service/neo4j 7474:7474
+start cmd /k kubectl port-forward service/neo4j 7474:7474

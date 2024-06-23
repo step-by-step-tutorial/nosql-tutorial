@@ -514,7 +514,7 @@ must read the
 file at first then map them to the bulk operation.
 
 In order to insert many data as batch/bulk you have to implement a function to execute the bulk operation therefore you
-can implement the function in JS because `mongosh` support JS so create a JS file name `insertPersonsAsBulk.js` or any
+can implement the function in JS because `mongosh` support JS so create a JS file name `insertPersons.js` or any
 other
 name then copy and past the following codes to the file.
 
@@ -537,23 +537,23 @@ const result = db.persons.bulkWrite(bulkOps);
 printjson(result);
 ```
 
-Now copy `persons.json` and `insertPersonsAsBulk.js` to MongoDB container with the commands were written at below.
+Now copy `persons.json` and `insertPersons.js` to MongoDB container with the commands were written at below.
 
 ```shell
 docker cp  /path/to/host-file container-name:/path/to/contaner-file
 
 #Example
 docker cp ./persons.json mongo:/persons.json
-docker cp  ./insertPersonsAsBulk.js mongo:/insertPersonsAsBulk.js 
+docker cp  ./insertPersons.js mongo:/insertPersons.js 
 ```
 
 Mongosh can interpret JS files therefore run the following command to insert data.
 
 ```shell
-docker exec -it mongo mongosh "mongodb://${username}:${password}@localhost:27017/${dbName}?authSource=admin" insertPersonsAsBulk.js
+docker exec -it mongo mongosh "mongodb://${username}:${password}@localhost:27017/${dbName}?authSource=admin" insertPersons.js
 
 #Example
-docker exec -it mongo mongosh "mongodb://root:root@mongo:27017/tutorial?authSource=admin" insertPersonsAsBulk.js
+docker exec -it mongo mongosh "mongodb://root:root@mongo:27017/tutorial?authSource=admin" insertPersons.js
 ```
 
 ### Find
