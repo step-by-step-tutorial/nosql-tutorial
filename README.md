@@ -8,5 +8,6 @@ This tutorial is proper for who wants to start with NoSQL databases.
 * [Janusgraph](janusgraph)
 * [Neo4j](neo4j)
 * [Redis](redis)
+* [CouchDB](couchdb)
 
 **<p align="center"> [Top](#nosql-tutorial) </p>**

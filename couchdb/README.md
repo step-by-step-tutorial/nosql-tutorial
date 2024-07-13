@@ -42,6 +42,9 @@ Execute the command mentioned in the below to create MongoDB container.
 
 ```shell
 docker compose --file docker-compose.yml --project-name couchdb up -d --build
+curl http://admin:password@127.0.0.1:5984
+curl http://admin:password@127.0.0.1:5984/_uuids?count=5
+curl http://admin:password@127.0.0.1:5984/demo
 ```
 
 Open [http://127.0.0.1:5984/_utils](http://127.0.0.1:5984/_utils) in the web browser to see web console of CouchDB.

@@ -27,8 +27,21 @@ kube-remove:
 	kubectl delete secrets mongo-configmap
 	kubectl delete persistentvolumeclaim mongo-pvc
 
-kube-port-forward-db:
+kube-port-forward-mongo:
 	kubectl port-forward service/mongo 27017:27017
 
-kube-port-forward-web:
+kube-port-forward-mongo-express:
 	kubectl port-forward service/mongo-express 8081:8081
+
+insert-bulk:
+	docker cp ./persons.json mongo:/persons.json
+	docker cp  ./insertPersons.js mongo:/insertPersons.js
+	docker exec -it mongo mongosh "mongodb://root:root@mongo:27017/tutorial?authSource=admin" insertPersons.js
+
+insert-file:
+	docker cp ./persons.json mongo:/persons.json
+	docker exec -it mongo mongofiles --host localhost --port 27017 --username root --password root --authenticationDatabase admin --db tutorial put persons.json
+
+run-test:
+	docker cp ./testCrud.json mongo:/testCrud.json
+	docker exec -it mongo mongosh "mongodb://root:root@mongo:27017/tutorial?authSource=admin" testCrud.js

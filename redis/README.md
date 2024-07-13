@@ -157,7 +157,7 @@ spec:
         - name: redisinsight
           image: redislabs/redisinsight:latest
           ports:
-            - containerPort: 8001
+            - containerPort: 5540
 ```
 
 [redisinsight-service.yml](./kube/redisinsight-service.yml)
@@ -173,8 +173,8 @@ spec:
     app: redisinsight
   ports:
     - protocol: TCP
-      port: 8001
-      targetPort: 8001
+      port: 5540
+      targetPort: 5540
 ```
 
 ### Apply Kube Files
@@ -196,7 +196,7 @@ In order to connect to Redis and Redisinsight from localhost use the following c
 
 ```shell
 kubectl port-forward service/redis 6379:6379
-kubectl port-forward service/redisinsight 8001:8001
+kubectl port-forward service/redisinsight 5540:5540
 ```
 
 ### Remove From Kubernetes
@@ -340,7 +340,7 @@ kube-port-forward-db:
 	kubectl port-forward service/redis 6379:6379
 
 kube-port-forward-web:
-	kubectl port-forward service/redisinsight 8001:8001
+	kubectl port-forward service/redisinsight 5540:5540
 	
 ```
 

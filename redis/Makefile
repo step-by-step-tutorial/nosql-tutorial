@@ -25,4 +25,4 @@ kube-port-forward-db:
 	kubectl port-forward service/redis 6379:6379
 
 kube-port-forward-web:
-	kubectl port-forward service/redisinsight 8001:8001
+	kubectl port-forward service/redisinsight 5540:5540
