@@ -151,9 +151,9 @@ curl -X DELETE -u admin:password http://127.0.0.1:5984/shop
 ### Create
 
 ```shell
-curl -X PUT -H "Content-Type: application/json" -u admin:password http://127.0.0.1:5984/shop/001 --data "{ \"Name\" : \"Amazon\" , \"URL\" :\"www.amazon.com\" }"
+curl -X PUT -H "Content-Type: application/json" -u admin:password http://127.0.0.1:5984/shop/001 --data "{ \"Name\" : \"CouchDB\" , \"URL\" :\"www.couchdb.apache.org\" }"
 # Output:{"ok":true,"id":"001","rev":"1-c81f7289f59ec3c485b2cfae69eae2ea"}
-curl -X PUT -H "Content-Type: application/json" -u admin:password http://127.0.0.1:5984/shop/002 --data "{ \"Name\" : \"Ebay\" , \"URL\" :\"www.ebay.com\" }"
+curl -X PUT -H "Content-Type: application/json" -u admin:password http://127.0.0.1:5984/shop/002 --data "{ \"Name\" : \"PouchDB\" , \"URL\" :\"www.pouchdb.com\" }"
 # Output:{"ok":true,"id":"002","rev":"1-b1fba88a7d267be2c97f2768d1f8e428"}
 ```
 
@@ -167,7 +167,7 @@ curl -X GET -H "Content-Type: application/json" -u admin:password http://127.0.0
 ### Update
 
 ```shell
-curl -X PUT -H "Content-Type: application/json" -u admin:password http://127.0.0.1:5984/shop/001 --data "{ \"Name\" : \"Amazon Inc.\",\"_rev\": \"1-c81f7289f59ec3c485b2cfae69eae2ea\" }"
+curl -X PUT -H "Content-Type: application/json" -u admin:password http://127.0.0.1:5984/shop/001 --data "{ \"Name\" : \"CouchDB Inc.\",\"_rev\": \"1-c81f7289f59ec3c485b2cfae69eae2ea\" }"
 # Output: {"ok":true,"id":"001","rev":"2-7524533d7f9108d55a0ec8afe70b7284"}
 ```
 
@@ -183,11 +183,11 @@ curl -X DELETE -u admin:password http://127.0.0.1:5984/shop/002?rev=1-b1fba88a7d
 ### Attache File
 
 ```shell
-curl -X PUT -H "Content-Type: application/json" -u admin:password http://127.0.0.1:5984/shop/001 --data "{ \"Name\" : \"Amazon\" , \"URL\" :\"www.amazon.com\" }"
+curl -X PUT -H "Content-Type: application/json" -u admin:password http://127.0.0.1:5984/shop/001 --data "{ \"Name\" : \"CouchDB\" , \"URL\" :\"www.couchdb.apache.org\" }"
 # Output:{"ok":true,"id":"001","rev":"4-f934c23aa52b801d75d57c490fcdb0da"}
-curl -vX PUT  -H "ContentType:image/jpg"  --data-binary @amazon.png -u admin:password http://127.0.0.1:5984/shop/001/amazon.png?rev=4-f934c23aa52b801d75d57c490fcdb0da
+curl -vX PUT  -H "ContentType:image/jpg"  --data-binary @couchdb.png -u admin:password http://127.0.0.1:5984/shop/001/couchdb.png?rev=4-f934c23aa52b801d75d57c490fcdb0da
 # Output:{"ok":true,"id":"001","rev":"5-f932b6ef0caa61cb11fa15ef28cfcc70"}
-curl -u admin:password http://127.0.0.1:5984/shop/001/amazon.png --output amazon.png
+curl -u admin:password http://127.0.0.1:5984/shop/001/couchdb.png --output couchdb.png
 ```
 
 # Make File
