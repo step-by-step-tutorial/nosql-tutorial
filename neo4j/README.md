@@ -297,10 +297,7 @@ john, james, william, charlie, saman
 
 [Makefile](Makefile)
 ```makefile
-docker-deploy:
-	docker compose --file docker-compose.yml --project-name neo4j up -d
-
-docker-rebuild-deploy:
+docker-compose-deploy:
 	docker compose --file docker-compose.yml --project-name neo4j up --build -d
 
 docker-remove-container:

@@ -1,7 +1,4 @@
-docker-deploy:
-	docker compose --file docker-compose.yml --project-name janusgraph up -d
-
-docker-rebuild-deploy:
+docker-compose-deploy:
 	docker compose --file docker-compose.yml --project-name janusgraph up --build -d
 
 docker-remove-container:

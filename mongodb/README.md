@@ -673,10 +673,7 @@ docker exec -it mongo mongofiles --host localhost --port 27017 --username root -
 [Makefile](Makefile)
 
 ```makefile
-docker-deploy:
-	docker compose --file docker-compose.yml --project-name mongo up -d
-
-docker-rebuild-deploy:
+docker-compose-deploy:
 	docker compose --file docker-compose.yml --project-name mongo up --build -d
 
 docker-remove-container:

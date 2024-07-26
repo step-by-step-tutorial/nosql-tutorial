@@ -313,10 +313,7 @@ docker exec -it redis bash /stream-reader.sh
 [Makefile](Makefile)
 
 ```makefile
-docker-deploy:
-	docker compose --file docker-compose.yml --project-name redis up -d
-
-docker-rebuild-deploy:
+docker-compose-deploy:
 	docker compose --file docker-compose.yml --project-name redis up --build -d
 
 docker-remove-container:

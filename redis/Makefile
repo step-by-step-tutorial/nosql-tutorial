@@ -1,7 +1,4 @@
-docker-deploy:
-	docker compose --file docker-compose.yml --project-name redis up -d
-
-docker-rebuild-deploy:
+docker-compose-deploy:
 	docker compose --file docker-compose.yml --project-name redis up --build -d
 
 docker-remove-container:
