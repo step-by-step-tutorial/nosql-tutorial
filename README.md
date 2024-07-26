@@ -9,5 +9,6 @@ This tutorial is proper for who wants to start with NoSQL databases.
 * [Neo4j](neo4j)
 * [Redis](redis)
 * [CouchDB](couchdb)
+* [Elasticsearch](elasticsearch)
 
 **<p align="center"> [Top](#nosql-tutorial) </p>**
