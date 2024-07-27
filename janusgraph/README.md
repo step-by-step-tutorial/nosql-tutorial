@@ -1,6 +1,5 @@
 # <p align="center">Janusgraph</p>
 
-
 # Setup
 
 ## Dockerized Installation
@@ -47,6 +46,7 @@ services:
 ```
 
 Execute the following command to create containers.
+
 ```shell
 docker compose --file docker-compose.yml --project-name janusgraph up -d --build
 
@@ -64,7 +64,9 @@ docker exec -it janusgraph ./bin/gremlin.sh
 g.V().count()
 
 ```
+
 ### Example
+
 ```shell
 // Create a vertex
 g.addV('person').property('name', 'Alice')

@@ -34,6 +34,7 @@ List of use cases for Neo4j
 Create a docker compose file include following content.
 
 [docker-compose.yml](docker-compose.yml)
+
 ```yaml
 # docker-compose.yml
 version: '3.8'
@@ -296,6 +297,7 @@ john, james, william, charlie, saman
 # Make File
 
 [Makefile](Makefile)
+
 ```makefile
 docker-compose-deploy:
 	docker compose --file docker-compose.yml --project-name neo4j up --build -d

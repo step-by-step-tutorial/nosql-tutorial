@@ -228,7 +228,9 @@ docker exec -it redis bash -c "redis-cli -h $(hostname) -p 6379"
 # Queries
 
 ## Basic Queries
+
 ### SET and GET
+
 ```redis
 set key value
 get key
@@ -239,6 +241,7 @@ get name
 ```
 
 ### HSET and GSET
+
 ```redis
 HSET person:1 name John surname Doe email johndoe@email.com
 HGETALL person:1
@@ -246,6 +249,7 @@ HGET person:1 name
 ```
 
 ### List
+
 ```redis
 LPUSH names John William James
 LRANGE names 0 2
@@ -254,7 +258,9 @@ LRANGE names 0 2
 ## Channel Publish Subscribe
 
 ### Subscriber
+
 Open a terminal then execute the following command one by one.
+
 ```shell
 subscribe channel
 

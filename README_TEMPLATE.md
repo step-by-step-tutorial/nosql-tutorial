@@ -1,6 +1,5 @@
 # <p align="center">Title</p>
 
-
 # Use Case
 
 List of use cases for TOOL_NAME
@@ -12,7 +11,7 @@ List of use cases for TOOL_NAME
 * [Docker](https://www.docker.com/)
 * [Kubernetes](https://kubernetes.io/)
 
-## Installation MongoDB on Docker
+## Installation TOOL_NAME on Docker
 
 ### Docker Compose File
 
@@ -25,10 +24,10 @@ List of use cases for TOOL_NAME
 
 ### Apply Docker Compose File
 
-Execute the command mentioned in the below to create MongoDB container.
+Execute the command mentioned in the below to create TOOL_NAME container.
 
 ```shell
-docker compose --file docker-compose.yml --project-name mongo up -d --build
+docker compose --file docker-compose.yml --project-name toolname up -d --build
 ```
 
 ### Remove From Docker
@@ -36,26 +35,26 @@ docker compose --file docker-compose.yml --project-name mongo up -d --build
 More commands to remove whatever you created.
 
 ```shell
-docker rm container-name --force
-docker image rm image-nam
+docker rm containername --force
+docker image rm imagename
 ```
 
-## Install MongoDB on Kubernetes
+## Install TOOL_NAME on Kubernetes
 
 create the following Kubernetes files then apply them.
 
-### MongoDB Kube Files
+### TOOL_NAME Kube Files
 
-[mongo-deployment.yml](./kube/mongo-deployment.yml)
+[toolname-deployment.yml](./kube/toolname-deployment.yml)
 
 ```yaml
-# mongo-deployment.yml
+# toolname-deployment.yml
 ```
 
-[mongo-service.yml](./kube/mongo-service.yml)
+[toolname-service.yml](./kube/toolname-service.yml)
 
 ```yaml
-# mongo-service.yml
+# toolname-service.yml
 ```
 
 ### Apply Kube Files
@@ -63,18 +62,18 @@ create the following Kubernetes files then apply them.
 You can apply Kubernetes files using the following commands.
 
 ```shell
-kubectl apply -f ./kube/mongo-deployment.yml
-kubectl apply -f ./kube/mongo-service.yml
+kubectl apply -f ./kube/toolname-deployment.yml
+kubectl apply -f ./kube/toolname-service.yml
 ```
 
 To check status, use `kubectl get all` command.
 
 <p align="justify">
 
-In order to connect to MongoDB and MongoExpress from localhost use the following command.
+In order to connect to TOOL_NAME from localhost use the following command.
 
 ```shell
-kubectl port-forward service/mongo 27017:27017
+kubectl port-forward service/toolname port:port
 ```
 
 ### Remove From Kubernetes
@@ -87,13 +86,19 @@ kubectl delete all --all
 
 # Queries
 
-## New Database
+## Database
 
+### Create
 
 ```shell
 ```
 
-## CRUD Collection
+### Delete Database
+
+```shell
+```
+
+## CRUD Table/Documentation/Collection
 
 ### Create
 
@@ -101,6 +106,11 @@ kubectl delete all --all
 ```
 
 ### Read
+
+```shell
+```
+
+### Update
 
 ```shell
 ```
@@ -117,12 +127,18 @@ kubectl delete all --all
 ```shell
 ```
 
+### Bulk Insert
+
+```shell
+
+```
+
 ### Find
 
 ```shell
 ```
 
-### Set
+### Update
 
 ```shell
 ```
@@ -139,38 +155,25 @@ kubectl delete all --all
 
 ```makefile
 docker-compose-deploy:
-	docker compose --file docker-compose.yml --project-name mongo up --build -d
+	docker compose --file docker-compose.yml --project-name toolname up --build -d
 
 docker-remove-container:
-	docker rm mongo --force
-	docker rm mongo-express --force
+	docker rm toolname --force
 
 docker-remove-image:
-	docker image rm mongo
-	docker image rm mongo-express
+	docker image rm image-name
 
 kube-deploy:
-	kubectl apply -f ./kube/mongo-secrets.yml
-	kubectl apply -f ./kube/mongo-configmap.yml
-	kubectl apply -f ./kube/mongo-pvc.yml
-	kubectl apply -f ./kube/mongo-deployment.yml
-	kubectl apply -f ./kube/mongo-service.yml
-	kubectl apply -f ./kube/mongo-express-deployment.yml
-	kubectl apply -f ./kube/mongo-express-service.yml
+	kubectl apply -f ./kube/toolname-deployment.yml
+	kubectl apply -f ./kube/toolname-service.yml
 
-kube-remove:
+kube-delete:
 	kubectl delete all --all
-	kubectl delete secrets mongo-secrets
-	kubectl delete secrets mongo-configmap
-	kubectl delete persistentvolumeclaim mongo-pvc
 
 kube-port-forward-db:
-	kubectl port-forward service/mongo 27017:27017
-
-kube-port-forward-web:
-	kubectl port-forward service/mongo-express 8081:8081
+	kubectl port-forward service/toolname port:port
 ```
 
 #
 
-**<p align="center"> [Top](#mongodb) </p>**
+**<p align="center"> [Top](#tool_name) </p>**
