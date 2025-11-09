@@ -1,63 +1,43 @@
 # <p align="center">CouchDB</p>
 
-To get more information refer to [https://couchdb.apache.org](https://couchdb.apache.org).
+To get more information, refer to [https://couchdb.apache.org](https://couchdb.apache.org).
 
-# Use Case
-
-List of use cases for CouchDB
-
-# Setup
+# Getting Started
 
 ## Prerequisites
 
 * [Docker](https://www.docker.com/)
 * [Kubernetes](https://kubernetes.io/)
-* [Couchdb](https://couchdb.apache.org)
 
-## Installation CouchDB on Docker
+## Dockerize
 
-### Docker Compose File
-
-[docker-compose.yml](docker-compose.yml)
-
-```yaml
-# docker-compose.yml
-version: '3.1'
-
-services:
-  couchdb:
-    image: couchdb
-    container_name: couchdb
-    hostname: couchdb
-    environment:
-      COUCHDB_USER: admin
-      COUCHDB_PASSWORD: password
-    ports:
-      - "5984:5984"
-```
-
-### Apply Docker Compose File
-
-Execute the command mentioned in the below to create MongoDB container.
+### Deploy
 
 ```shell
 docker compose --file docker-compose.yml --project-name couchdb up -d --build
+```
+
+### Test
+
+```shell
 curl  -u admin:password http://127.0.0.1:5984
 curl  -u admin:password http://127.0.0.1:5984/_uuids?count=1
 curl  -u admin:password http://127.0.0.1:5984/demo
 ```
 
-Open [http://127.0.0.1:5984/_utils](http://127.0.0.1:5984/_utils) in the web browser to see web console of CouchDB.
+### Access
+
+CouchDB: [http://127.0.0.1:5984/_utils](http://127.0.0.1:5984/_utils)
 
 ```yaml
 username: admin
 password: password
 ```
 
-### After Installation
+### Setup
 
-Open [http://127.0.0.1:5984/_utils/#setup](http://127.0.0.1:5984/_utils/#setup) to set up database. In this case I set
-up database as a single node.
+Open [http://127.0.0.1:5984/_utils/#setup](http://127.0.0.1:5984/_utils/#setup) to set up a database. In this case I set
+up a database as a single node.
 
 ```shell
 curl -X GET -u admin:password http://127.0.0.1:5984/_all_dbs
@@ -68,55 +48,57 @@ curl -X PUT -u admin:password http://127.0.0.1:5984/_replicator
 curl -X PUT -u admin:password http://127.0.0.1:5984/_global_changes
 ```
 
-### Remove From Docker
-
-More commands to remove whatever you created.
+### Down
 
 ```shell
 docker rm couchdb --force
 docker image rm couchdb
 ```
 
-## Install CouchDB on Kubernetes
+## Kubernetes
 
-Create the following files for installing CouchDB.
-
-### CouchDB Kube Files
-
-[couchdb-deployment.yml](./kube/couchdb-deployment.yml)
-
-```yaml
-# couchdb-deployment.yml
-```
-
-[couchdb-service.yml](./kube/couchdb-service.yml)
-
-```yaml
-# couchdb-service.yml
-```
-
-### Apply Kube Files
-
-You can apply Kubernetes files using the following commands.
+### Deploy
 
 ```shell
-kubectl apply -f ./kube/couchdb-deployment.yml
-kubectl apply -f ./kube/couchdb-service.yml
+kubectl apply -f ./test-env.yml
 ```
 
-To check status, use `kubectl get all` command.
+### Test
 
-<p align="justify">
+```shell
+kubectl get all
+```
 
-In order to connect to CouchDB from localhost use the following command.
+### Port Forward
 
 ```shell
 kubectl port-forward service/couchdb 5984:5984
 ```
 
-### Remove From Kubernetes
+### Access
 
-More command to delete everything you created and deployed to Kubernetes.
+CouchDB: [http://127.0.0.1:5984/_utils](http://127.0.0.1:5984/_utils)
+
+```yaml
+username: admin
+password: password
+```
+
+### Setup
+
+Open [http://127.0.0.1:5984/_utils/#setup](http://127.0.0.1:5984/_utils/#setup) to set up a database. In this case I set
+up a database as a single node.
+
+```shell
+curl -X GET -u admin:password http://127.0.0.1:5984/_all_dbs
+# Output:["_replicator","_users"]
+
+curl -X PUT -u admin:password http://127.0.0.1:5984/_users
+curl -X PUT -u admin:password http://127.0.0.1:5984/_replicator
+curl -X PUT -u admin:password http://127.0.0.1:5984/_global_changes
+```
+
+### Down
 
 ```shell
 kubectl delete all --all
@@ -180,7 +162,7 @@ curl -X DELETE -u admin:password http://127.0.0.1:5984/shop/002?rev=1-b1fba88a7d
 # Output:{"ok":true,"id":"002","rev":"2-576524274188a157dd88849331a85867"}
 ```
 
-### Attache File
+### Attach File
 
 ```shell
 curl -X PUT -H "Content-Type: application/json" -u admin:password http://127.0.0.1:5984/shop/001 --data "{ \"Name\" : \"CouchDB\" , \"URL\" :\"www.couchdb.apache.org\" }"
@@ -188,31 +170,6 @@ curl -X PUT -H "Content-Type: application/json" -u admin:password http://127.0.0
 curl -vX PUT  -H "ContentType:image/jpg"  --data-binary @couchdb.png -u admin:password http://127.0.0.1:5984/shop/001/couchdb.png?rev=4-f934c23aa52b801d75d57c490fcdb0da
 # Output:{"ok":true,"id":"001","rev":"5-f932b6ef0caa61cb11fa15ef28cfcc70"}
 curl -u admin:password http://127.0.0.1:5984/shop/001/couchdb.png --output couchdb.png
-```
-
-# Make File
-
-[Makefile](Makefile)
-
-```makefile
-docker-compose-deploy:
-	docker compose --file docker-compose.yml --project-name couchdb up --build -d
-
-docker-remove-container:
-	docker rm couchdb --force
-
-docker-remove-image:
-	docker image rm couchdb
-
-kube-deploy:
-	kubectl apply -f ./kube/couchdb-deployment.yml
-	kubectl apply -f ./kube/couchdb-service.yml
-
-kube-remove:
-	kubectl delete all --all
-
-kube-port-forward-db:
-	kubectl port-forward service/couchdb 5984:5984	
 ```
 
 #

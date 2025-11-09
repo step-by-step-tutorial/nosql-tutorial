@@ -1,0 +1,61 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: test-env
+
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: test-credentials
+  namespace: test-env
+type: Opaque
+stringData:
+  COUCHDB_USER: admin
+  COUCHDB_PASSWORD: password
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: couchdb
+  namespace: test-env
+  labels:
+    app: couchdb
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: couchdb
+  template:
+    metadata:
+      labels:
+        app: couchdb
+    spec:
+      hostname: couchdb
+      containers:
+        - name: couchdb
+          image: couchdb
+          ports:
+            - containerPort: 5984
+          envFrom:
+            - secretRef:
+                name: test-credentials
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: couchdb
+  namespace: test-env
+  labels:
+    app: couchdb
+spec:
+  selector:
+    app: couchdb
+  ports:
+    - name: http
+      port: 5984
+      targetPort: 5984
+  type: NodePort   # or ClusterIP if you only want internal access

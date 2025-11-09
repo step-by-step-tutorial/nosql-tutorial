@@ -71,7 +71,7 @@ open [http://localhost:5540](http://localhost:5540).
 
 </p>
 
-Then select "Add connection details manually" and enter redis as host and 6379 for port. Also, you can enter an alias
+Then select "Add connection details manually" and enter `redis` as host and `6379` for port. Also, you can enter an alias
 for database.
 
 ### Remove From Docker

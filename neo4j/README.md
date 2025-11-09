@@ -234,7 +234,7 @@ CREATE
 ```sql
 CREATE
 (james:Person { name: 'James', from: 'USA', learn: 'surfing' }),
-(william:Person { name: 'William', from: 'England', title: 'author' }),
+(william:Person { name: 'William', from: 'Canada', title: 'author' }),
 (charlie:Person { name: 'Charlie', from: 'Australia', pet: 'Orval' }),
 (saman:Person { name: 'Saman', from: 'Iran', hobby: 'surfing' }) 
 ```

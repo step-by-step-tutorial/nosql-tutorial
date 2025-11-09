@@ -93,7 +93,7 @@ kubectl delete all --all
 ```shell
 ```
 
-### Delete Database
+### Delete
 
 ```shell
 ```

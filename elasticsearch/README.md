@@ -94,7 +94,7 @@ Password: password
 
 ```shell
 # configure the Kibana password in the elasticsearch container
-docker exec elasticsearch ./bin/elasticsearch-reset-password -u kibana_system -i
+docker exec -it elasticsearch ./bin/elasticsearch-reset-password -u kibana_system -i
 ```
 
 ```shell
